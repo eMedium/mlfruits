@@ -16,8 +16,12 @@ env/Scripts/python*
 env/*.cfg
 pyvenv.cfg
 
+# Keep source files
+!env/src/*.py
+
 # Model files
-*.pth
+env/models/*.pth
+!env/models/.gitkeep
 
 # Dataset
 data/

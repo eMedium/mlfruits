@@ -11,7 +11,8 @@ from load_data import val_data, val_transform
 from model import FruitClassifier
 from GPUtil import showUtilization as gpu_usage
 
-model_path = 'best_model.pth'
+MODELS_DIR = 'D:/mlfruits/env/models'
+model_path = os.path.join(MODELS_DIR, 'best_model.pth')
 
 class SquarePad:
     def __call__(self, img):

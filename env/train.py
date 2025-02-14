@@ -11,6 +11,9 @@ from load_data import train_data, val_data
 from model import FruitClassifier
 from GPUtil import showUtilization as gpu_usage
 
+MODELS_DIR = 'D:/mlfruits/env/models'
+os.makedirs(MODELS_DIR, exist_ok=True)
+
 EPOCHS = 75
 learning_rate = 0.0003
 max_learning_rate = 0.001
@@ -58,7 +61,7 @@ def train_model(model, train_loader, val_loader, criterion, optimizer, scheduler
             best_val_acc = val_acc
             patience_counter = 0
             # Save best model
-            torch.save(model.state_dict(), 'best_model.pth')
+            torch.save(model.state_dict(), os.path.join(MODELS_DIR, 'best_model.pth'))
         else:
             patience_counter += 1
             
@@ -143,8 +146,9 @@ if __name__ == '__main__':
     # Save final model
     timestamp = datetime.now().strftime('%Y%m%d_%H%M%S')
     model_filename = f'fruit_model_{timestamp}.pth'
-    torch.save(model.state_dict(), model_filename)
-    print(f"Model saved as {model_filename}")
+    model_path = os.path.join(MODELS_DIR, model_filename)
+    torch.save(model.state_dict(), model_path)
+    print(f"Model saved as {model_path}")
 
     if torch.cuda.is_available():
         print("\nGPU Usage:")
