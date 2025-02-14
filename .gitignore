@@ -1,0 +1,17 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+env/
+.env
+*.pth
+
+# Dataset
+data/
+
+# IDE
+.vscode/
+.idea/
+
+# Other
+*.log
