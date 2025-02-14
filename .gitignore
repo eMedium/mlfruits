@@ -2,8 +2,21 @@
 __pycache__/
 *.py[cod]
 *$py.class
-env/
-.env
+*.pyc
+
+# Virtual Environment
+env/Lib/
+env/Include/
+env/Scripts/*.exe
+env/Scripts/*.dll
+env/Scripts/activate*
+env/Scripts/deactivate*
+env/Scripts/pip*
+env/Scripts/python*
+env/*.cfg
+pyvenv.cfg
+
+# Model files
 *.pth
 
 # Dataset
