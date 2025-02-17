@@ -1,4 +1,4 @@
-Hello, this is a simple app to recognize fruits using machine learning model with PyTorch.
+Hello, I'm learning the basics of ML and this is a simple app to recognize fruits using machine learning model with PyTorch.
 
 How to use in VS Code:
 
