@@ -71,3 +71,6 @@ It has a function to stop the process early if it detects no further improvement
 Trained model is saved with a timestamp after the process is done, however the program saves also best_model.pth with the highest achieved accuracy during the process. So that is why in validate.py I use best_model as reference. You can update your 'models' folder path (serach for MODELS_DIR).
 
 4. validate.py is to show plots with statistics of how accurate the model recognized pictures from validation classes.
+
+
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details
