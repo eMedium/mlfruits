@@ -17,23 +17,11 @@ pip install torch torchvision numpy matplotlib seaborn scikit-learn GPUtil
 
 4. The structure looks like this:
 
-mlfruits/
-├── data/
-│   ├── train/
-│   │   ├── apple/
-│   │   ├── banana/
-│   │   └── orange/
-│   └── validation/
-│       ├── apple/
-│       ├── banana/
-│       └── orange/
-├── env/Scripts/
-│   ├── analyze_dataset.py
-│   ├── load_data.py
-│   ├── model.py
-│   ├── train.py
-│   └── validate.py
-└── README.md
+mlfruits/data/train/apple, banana, orange...
+mlfruits/data/validation/apple, banana, orange...
+mlfruits/env/Scripts/ <- all important .py files 
+mlfruits/env/models/ <- saved trained models.pth
+
 
 Create a DATA folder and put inside the TRAIN and VALIDATION folders, each containing a separated class of fruit fileld with pictures.jpg of your choice.
 YOU MUST keep the classes symetrical so for each class in train folder, a corresponding class should be in validation folder.
