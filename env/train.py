@@ -1,14 +1,12 @@
-# file: train.py
-import torch
-import multiprocessing
 import os
+import torch
 from torch import nn, optim
-from torch.utils.data import DataLoader
-from torch.optim.lr_scheduler import OneCycleLR
 from datetime import datetime
-from validate import validate_model
-from load_data import train_data, val_data
 from model import FruitClassifier
+from validate import validate_model
+from torch.utils.data import DataLoader
+from load_data import train_data, val_data
+from torch.optim.lr_scheduler import OneCycleLR
 from GPUtil import showUtilization as gpu_usage
 
 MODELS_DIR = 'D:/mlfruits/env/models'
@@ -21,12 +19,11 @@ weight_decay = 1e-4
 
 def train_model(model, train_loader, val_loader, criterion, optimizer, scheduler, device, epochs=EPOCHS):
     best_val_acc = 0.0
-    patience = 10  # Number of epochs to wait for improvement
+    patience = 10 
     patience_counter = 0
     
     
     for epoch in range(epochs):
-        # Training phase
         model.train()
         running_loss = 0.0
         val_loss = 0.0
@@ -52,20 +49,16 @@ def train_model(model, train_loader, val_loader, criterion, optimizer, scheduler
         train_loss = running_loss / len(train_loader)
         train_acc = 100 * correct / total
 
-        # Validation phase
         results = validate_model(model, val_loader, device, plot_matrices=False)
         val_acc = results['accuracy']
 
-        # Early stopping check
         if val_acc > best_val_acc:
             best_val_acc = val_acc
             patience_counter = 0
-            # Save best model
             torch.save(model.state_dict(), os.path.join(MODELS_DIR, 'best_model.pth'))
         else:
             patience_counter += 1
-            
-        # Stop if no improvement for 'patience' epochs
+        
         if patience_counter >= patience:
             print(f'Early stopping at epoch {epoch+1}')
             break
@@ -90,31 +83,27 @@ def train_model(model, train_loader, val_loader, criterion, optimizer, scheduler
         print(f'Best Val Acc: {best_val_acc:.2f}%')
         print(f'Learning Rate: {scheduler.get_last_lr()[0]:.6f}')
         
-        # Save best model based on validation accuracy
         if val_acc > best_val_acc:
             best_acc = val_acc
             torch.save(model.state_dict(), 'best_model.pth')
 
 if __name__ == '__main__':
-    # Set device
     device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
     print(f'Using device: {device}')
     if device.type == 'cuda':
         print(f'GPU: {torch.cuda.get_device_name(0)}')
         print(f'CUDA Version: {torch.version.cuda}')
 
-    # Initialize model and training components
     model = FruitClassifier()
     model = model.to(device)
     criterion = nn.CrossEntropyLoss()
     optimizer = optim.Adam(model.parameters(), lr=learning_rate, weight_decay=weight_decay) 
     
-    # Create data loader
     train_loader = DataLoader(
         train_data, 
         batch_size=8,  
         shuffle=True,
-        num_workers=4 if os.name != 'nt' else 0,  # Windows compatibility
+        num_workers=4 if os.name != 'nt' else 0,
         pin_memory=True if torch.cuda.is_available() else False
     )
 
@@ -126,7 +115,6 @@ if __name__ == '__main__':
         pin_memory=True if torch.cuda.is_available() else False
     )
 
-    # Initialize learning rate scheduler
     scheduler = OneCycleLR(
         optimizer,
         max_lr=max_learning_rate,
@@ -136,14 +124,11 @@ if __name__ == '__main__':
         anneal_strategy='cos'
     )
 
-    # Train the model
     final_results = train_model(model, train_loader, val_loader, criterion, optimizer, scheduler, device, epochs=EPOCHS)
     
-    # Plot final validation results
     print("\nFinal Validation Results:")
     results = validate_model(model, val_loader, device, plot_matrices=True)
     
-    # Save final model
     timestamp = datetime.now().strftime('%Y%m%d_%H%M%S')
     model_filename = f'fruit_model_{timestamp}.pth'
     model_path = os.path.join(MODELS_DIR, model_filename)

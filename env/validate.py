@@ -1,22 +1,21 @@
-import torch
 import os
-from torch.utils.data import DataLoader
-import torchvision.transforms as transforms
-import torchvision.transforms.functional as F
-from sklearn.metrics import confusion_matrix
+import torch
+import numpy as np
 import seaborn as sns
 import matplotlib.pyplot as plt
-import numpy as np
-from load_data import val_data, val_transform
-from model import FruitClassifier
+import torchvision.transforms.functional as F
 from GPUtil import showUtilization as gpu_usage
+from sklearn.metrics import confusion_matrix
+from torch.utils.data import DataLoader
+from model import FruitClassifier
+from load_data import val_data
+
 
 MODELS_DIR = 'D:/mlfruits/env/models'
 model_path = os.path.join(MODELS_DIR, 'best_model.pth')
 
 class SquarePad:
     def __call__(self, img):
-        # First pad to square
         w, h = img.size
         max_wh = max(w, h)
         hp = (max_wh - w) // 2
@@ -24,7 +23,6 @@ class SquarePad:
         padding = (hp, vp, hp, vp)
         img = F.pad(img, padding, 0, 'constant')
         
-        # Then resize to desired size
         return F.resize(img, (224, 224))
     
 def plot_confusion_matrix(y_true, y_pred, classes):
@@ -41,8 +39,9 @@ def validate_model(model, val_loader, device, plot_matrices=False):
     softmax = torch.nn.Softmax(dim=1)
     correct = 0
     total = 0
-    class_correct = {i: 0 for i in range(3)}  # For 3 classes
-    class_total = {i: 0 for i in range(3)}
+    num_classes = len(val_data.classes)
+    class_correct = {i: 0 for i in range(num_classes)}
+    class_total = {i: 0 for i in range(num_classes)}
     all_preds = []
     all_labels = []
     misclassified = []
@@ -57,7 +56,6 @@ def validate_model(model, val_loader, device, plot_matrices=False):
             total += labels.size(0)
             correct += (predictions == labels).sum().item()
 
-            # Collect misclassified images
             for i, (pred, conf, true, img) in enumerate(zip(predictions, confidences, labels, images)):
                 if pred != true:
                     misclassified.append({
@@ -67,7 +65,6 @@ def validate_model(model, val_loader, device, plot_matrices=False):
                         'conf': conf.item()
                     })
                 
-                # Per-class accuracy
                 class_total[true.item()] += 1
                 if pred == true:
                     class_correct[true.item()] += 1
@@ -75,21 +72,17 @@ def validate_model(model, val_loader, device, plot_matrices=False):
             all_preds.extend(predictions.cpu().numpy())
             all_labels.extend(labels.cpu().numpy())
     
-    # Print overall accuracy
     accuracy = 100 * correct / total
     print(f'\nOverall Validation Accuracy: {accuracy:.2f}%')
     
-    # Print per-class accuracy
     print("\nPer-class Accuracy:")
     class_accuracies = {}
-    for i in range(3):
+    for i in range(num_classes):
         class_acc = 100 * class_correct[i] / class_total[i]
         class_accuracies[val_data.classes[i]] = class_acc
         print(f'{val_data.classes[i]}: {class_acc:.2f}%')
 
-    # Only plot if explicitly requested
     if plot_matrices:
-        # Plot confusion matrix
         plot_confusion_matrix(all_labels, all_preds, val_data.classes)
     
     return {
@@ -101,21 +94,17 @@ def validate_model(model, val_loader, device, plot_matrices=False):
     
 
 def plot_misclassified(misclassified, max_images=5):
-    """Plot misclassified images with their true and predictions labels"""
     if not misclassified:
         print("No misclassified images found!")
         return
     
-    # Limit number of images to display
     misclassified = misclassified[:max_images]
         
     fig, axes = plt.subplots(1, len(misclassified), figsize=(15, 3))
-    # Handle case where there's only one misclassified image
     if len(misclassified) == 1:
         axes = [axes]
         
     for i, data in enumerate(misclassified):
-        # Denormalize image
         img = data['image'].cpu().numpy().transpose(1, 2, 0)
         mean = np.array([0.485, 0.456, 0.406])
         std = np.array([0.229, 0.224, 0.225])
@@ -130,11 +119,9 @@ def plot_misclassified(misclassified, max_images=5):
     plt.show()
 
 if __name__ == "__main__":
-    # Set device
     device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
     print(f'Using device: {device}')
-    
-    # Initialize model and move to device
+
     model = FruitClassifier()
     model.to(device)
     
@@ -153,13 +140,10 @@ if __name__ == "__main__":
         pin_memory=torch.cuda.is_available()
     )
     
-    # Run validation
     results = validate_model(model, val_loader, device, plot_matrices=True)
 
-    # Plot misclassified images
     plot_misclassified(results['misclassified'], max_images=8)
     
-    # Print GPU usage if available
     if torch.cuda.is_available():
         print("\nGPU Usage:")
         gpu_usage()

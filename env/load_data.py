@@ -5,7 +5,6 @@ data_dir = 'D:/mlfruits/env/data'
 
 class SquarePad:
     def __call__(self, img):
-        # First pad to square
         w, h = img.size
         max_wh = max(w, h)
         hp = (max_wh - w) // 2
@@ -13,17 +12,15 @@ class SquarePad:
         padding = (hp, vp, hp, vp)
         img = F.pad(img, padding, 0, 'constant')
         
-        # Then resize to desired size
         return F.resize(img, (224, 224))
 
-# Define transforms
 train_transform = transforms.Compose([
     SquarePad(),
     transforms.RandomHorizontalFlip(p=0.5),
-    transforms.RandomRotation(60),  # Increased rotation range
+    transforms.RandomRotation(60),
     transforms.RandomAffine(
         degrees=0,
-        translate=(0.2, 0.2),  # Add translation
+        translate=(0.2, 0.2),
         scale=(0.7, 1.3),
         shear=20
     ),
@@ -33,7 +30,7 @@ train_transform = transforms.Compose([
         saturation=0.4,
         hue=0.2
     ),
-    transforms.RandomPerspective(distortion_scale=0.2, p=0.5),  # Add perspective changes
+    transforms.RandomPerspective(distortion_scale=0.2, p=0.5),
     transforms.ToTensor(),
     transforms.Normalize(
         mean=[0.485, 0.456, 0.406],
@@ -42,7 +39,7 @@ train_transform = transforms.Compose([
 ])
 
 val_transform = transforms.Compose([
-    SquarePad(),  # This will now handle both padding and resizing
+    SquarePad(),
     transforms.ToTensor(),
     transforms.Normalize(
         mean=[0.485, 0.456, 0.406],
@@ -50,7 +47,6 @@ val_transform = transforms.Compose([
     )
 ])
 
-# Load datasets
 train_data = datasets.ImageFolder(data_dir + '/train', transform=train_transform)
 val_data = datasets.ImageFolder(data_dir + '/validation', transform=val_transform)
 
