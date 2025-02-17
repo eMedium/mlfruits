@@ -18,9 +18,13 @@ pip install torch torchvision numpy matplotlib seaborn scikit-learn GPUtil
 4. The structure looks like this:
 
   mlfruits/data/train/apple, banana, orange...
+  
   mlfruits/data/validation/apple, banana, orange...
+  
   mlfruits/env/Scripts/ <- all important .py files 
+  
   mlfruits/env/models/ <- saved trained models.pth
+
 
 
 Create a DATA folder and put inside the TRAIN and VALIDATION folders, each containing a separated class of fruit fileld with pictures.jpg of your choice.
@@ -46,7 +50,9 @@ python env/Scripts/validate.py
 
 
 ========================
+
 Additional informations:
+
 ========================
 
 1. model.py uses an imported from torchvision ResNet18 model that is tailored to support well pictures like fruits. You can replace it with any other model your want, if you decide to train a different kind of pictures or to use a default CNN model. Modify then accordingly class FruitClassifier(nn.Module) and update references to it in other files.
